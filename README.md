@@ -37,6 +37,13 @@ This is selenium based bot made in Python to automate the IPO application proces
 5. **Demat configuration**
 
     You are supposed to add the details of yours and others demat accounts in `user_details.csv` file.
+    
+    **Sample user_details.csv file**
+    
+   | alias  | dp_id | username | password    | crn     | txn_pin | apply_unit |
+   |--------|-------|----------|-------------|---------|---------|------------|
+   | Sulove | 10900 | 1234567  | password123 | 1233y84 | 1111    | 10         |
+   | Bista  | 10900 | 1235664  | pass123     | 12314   | 2222    | 20         |
 
 6. **Running program**
 
