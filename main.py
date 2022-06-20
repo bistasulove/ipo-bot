@@ -30,14 +30,16 @@ if __name__ == "__main__":
             if os.environ.get("APPLY_ALL") == "True":
                 logger.info("Found config to apply all share...")
                 indices = mero_share.get_issue_indexes_for(share_type="all")
-                mero_share.apply_ipo(user, indices)
             elif os.environ.get("APPLY_FIRST") == "True":
                 logger.info("Found config to apply 1st share...")
-                mero_share.apply_ipo(user, [1])
+                indices = mero_share.get_issue_indexes_for(share_type="first")
             elif os.environ.get("APPLY_ORDINARY_SHARES") == "True":
                 logger.info("Found config to apply all ordinary shares...")
                 indices = mero_share.get_issue_indexes_for(share_type="Ordinary Shares")
-                mero_share.apply_ipo(user, indices)
+            if not indices:
+                logger.warning("No open issues found for your config.")
+                continue
+            mero_share.apply_ipo(user, indices)
         else:
             input_indices = input("Enter the index of issue you want to apply. To apply multiple issue, enter the "
                                   "index in comma separated fashion. Eg: 1,2,3 \n")
