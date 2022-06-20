@@ -139,6 +139,8 @@ class IpoBot:
     def get_issue_indexes_for(self, share_type):
         if share_type == "all":
             return list(range(1, len(self.open_issues) + 1))
+        elif share_type == "first":
+            return [1] if self.open_issues else []
         else:
             return [int(d["index"]) for d in self.open_issues if d["Type of Share"] == share_type]
 
