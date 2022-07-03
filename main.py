@@ -15,7 +15,7 @@ if __name__ == "__main__":
         try:
             mero_share = IpoBot()
         except Exception as e:
-            logger.error("Error opening meroshare page. Please try again or after a while")
+            logger.error("Error opening meroshare page. Please try again or after a while", e)
             break
         try:
             mero_share.login(user)

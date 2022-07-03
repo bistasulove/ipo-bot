@@ -5,6 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import logging
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -12,6 +13,8 @@ logger = logging.getLogger(__name__)
 MEROSHARE_URL = "https://meroshare.cdsc.com.np/#/{}"
 
 SUCCESSFUL_APPLICATION_TOAST = "Share has been applied successfully."
+
+IGNORED_EXCEPTIONS = (NoSuchElementException, StaleElementReferenceException,)
 
 # ERROR_LISTS = [
 #     "Unable to process request at the moment",
@@ -24,7 +27,7 @@ def get_driver():
     # currently supporting only one browser.
     # later, different browser's driver can be installed based on the args provided while running the program
     # for example python --driver=firefox main.py
-    return webdriver.Chrome(ChromeDriverManager(chrome_type=ChromeType.BRAVE).install())
+    return webdriver.Chrome(ChromeDriverManager(chrome_type=ChromeType.GOOGLE).install())
 
 
 def display_open_issues(open_issues):
@@ -117,6 +120,10 @@ class IpoBot:
         for idx, open_issue in enumerate(open_issues_raw, start=1):
             issue_for = open_issue[2].split('(')[0].strip()
             ticker = open_issue[2].split('(')[1].strip(')')
+            try:
+                mode = open_issue[5].strip(),
+            except Exception as e:
+                mode = "Edit"
             open_issues.append(
                 {
                     "index": idx,
@@ -125,13 +132,13 @@ class IpoBot:
                     "Ticker": ticker.strip(),
                     "Type of Issue": open_issue[3].strip(),
                     "Type of Share": open_issue[4].strip(),
-                    "Mode": open_issue[5].strip(),
+                    "Mode": mode,
                 }
             )
         return open_issues
 
     def parse_open_issues(self, max_retries=3):
-        WebDriverWait(self.__driver, 30).until(EC.presence_of_element_located((By.TAG_NAME, "app-applicable-issue")))
+        WebDriverWait(self.__driver, 30, ignored_exceptions=IGNORED_EXCEPTIONS).until(EC.presence_of_element_located((By.TAG_NAME, "app-applicable-issue")))
         self.open_issues_selector = self.__driver.find_elements(By.CLASS_NAME, "company-list")
         self.open_issues = self._get_open_issue_details()
         display_open_issues(self.open_issues)
@@ -208,14 +215,15 @@ class IpoBot:
         failed = []
         for index in indices:
             issue_to_apply = self.open_issues_selector[index-1]
-            if issue_to_apply.text.split('\n')[-1] != "Apply":
+            issue_to_apply_text = issue_to_apply.text
+            if issue_to_apply_text.split('\n')[-1] != "Apply":
                 logger.error("You have already applied to this IPO.")
                 return
             issue_to_apply.find_element(By.CLASS_NAME, "btn-issue").click()
             if self._apply_individual_ipo(user_details):
-                success.append(issue_to_apply.text.split('\n')[2].split('(')[1].strip(')'))
+                success.append(issue_to_apply_text.split('\n')[2].split('(')[1].strip(')'))
             else:
-                failed.append(issue_to_apply.text.split('\n')[2].split('(')[1].strip(')'))
+                failed.append(issue_to_apply_text.split('\n')[2].split('(')[1].strip(')'))
         if success:
             logger.info(f"Successful IPO applied: {success}")
         if failed:
