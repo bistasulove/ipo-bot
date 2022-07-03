@@ -50,3 +50,5 @@ This is selenium based bot made in Python to automate the IPO application proces
     ```sh
      python main.py
      ```
+     
+***Note: This project assumes that you have Google Chrome installed. Please change the driver in `driver.py` if you want to run other browser.***
